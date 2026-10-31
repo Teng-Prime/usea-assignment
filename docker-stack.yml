@@ -4,12 +4,31 @@ services:
   my_web_app:
     image: 781493733610.dkr.ecr.ap-southeast-2.amazonaws.com/usea-first-appb:v1.0.0
     ports:
-      - "80:80"
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: ingress
     deploy:
-      replicas: 2
+      replicas: 3
       update_config:
         parallelism: 1
         delay: 10s
         order: start-first
+        failure_action: rollback
+        monitor: 15s
+      rollback_config:
+        parallelism: 1
+        delay: 10s
+        order: stop-first
       restart_policy:
         condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
+        reservations:
+          cpus: '0.10'
+          memory: 64M
