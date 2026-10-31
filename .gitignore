@@ -1,7 +1,3 @@
----
-
-### 7. `.gitignore` (Root Directory)
-```gitignore
 # Infrastructure & Terraform state files
 *.tfstate
 *.tfstate.backup
@@ -11,9 +7,13 @@
 # Secret keys and credentials
 *.pem
 *.key
+*.pub
 .env
 
 # OS and Editor files
 .DS_Store
 .idea/
 .vscode/
+
+# Word temporary and lock files
+~$*

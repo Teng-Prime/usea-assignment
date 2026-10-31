@@ -1,9 +1,13 @@
 pipeline {
     agent any
 
+    triggers {
+        pollSCM('H/5 * * * *')
+    }
+
     parameters {
         choice(name: 'ACTION', choices: ['deploy', 'rollback'], description: 'Select action to execute')
-        string(name: 'VERSION', defaultValue: 'v1.0.0', description: 'Target version tag (e.g. v1.0.0)')
+        string(name: 'VERSION', defaultValue: 'v1.0.0', description: 'Target version tag (e.g. v1.0.0, v1.1.0, v1.2.0)')
     }
 
     environment {
@@ -32,7 +36,45 @@ pipeline {
             }
         }
 
-        stage('2. Build & Push Image to ECR') {
+        stage('2. Automated Lint & Smoke Test') {
+            when {
+                expression { env.CURRENT_ACTION == 'deploy' }
+            }
+            steps {
+                script {
+                    echo "Executing pre-deployment automated tests..."
+                    sh """
+                    # Step A: Validate static HTML file structure
+                    if ! grep -q "USEA Student Portal" index.html; then
+                        echo "TEST FAILED: 'USEA Student Portal' header not found in index.html"
+                        exit 1
+                    fi
+
+                    # Step B: Build localized test container image
+                    docker build -t test-app:${BUILD_NUMBER} .
+
+                    # Step C: Spin up ephemeral test container
+                    docker rm -f smoke-test-${BUILD_NUMBER} 2>/dev/null || true
+                    docker run -d --name smoke-test-${BUILD_NUMBER} -p 8089:80 test-app:${BUILD_NUMBER}
+                    sleep 3
+
+                    # Step D: Execute automated curl health check probe
+                    HTTP_STATUS=\$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8089/)
+                    docker rm -f smoke-test-${BUILD_NUMBER}
+                    docker rmi test-app:${BUILD_NUMBER} || true
+
+                    if [ "\${HTTP_STATUS}" -ne 200 ]; then
+                        echo "TEST FAILED: Container probe returned HTTP status \${HTTP_STATUS} (expected 200)"
+                        exit 1
+                    fi
+
+                    echo "✅ Automated Smoke Test PASSED: Container responded with HTTP 200 OK"
+                    """
+                }
+            }
+        }
+
+        stage('3. Build & Push Image to ECR') {
             when {
                 expression { env.CURRENT_ACTION == 'deploy' }
             }
@@ -48,13 +90,14 @@ pipeline {
             }
         }
 
-        stage('3. Deploy or Rollback on Docker Swarm') {
+        stage('4. Deploy or Rollback on Docker Swarm') {
             steps {
                 sshagent(['swarm-ssh-key']) {
                     sh """
                     ssh -o StrictHostKeyChecking=no ubuntu@${SWARM_MANAGER} "
                         aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
                         docker service update --image ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${RELEASE_TAG} --with-registry-auth ${SERVICE_NAME}
+                        docker service ps ${SERVICE_NAME}
                     "
                     """
                 }
