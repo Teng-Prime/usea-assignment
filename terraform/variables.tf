@@ -18,7 +18,7 @@ variable "worker_count" {
 
 variable "key_name" {
   type        = string
-  default     = "swarm-ssh-key"
+  default     = "tenghomework"
   description = "AWS SSH Key pair name"
 }
 

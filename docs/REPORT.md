@@ -13,7 +13,7 @@
 3. **NGY LYTENG**  
 
 **GitHub Repository:** [https://github.com/Teng-Prime/usea-assignment.git](https://github.com/Teng-Prime/usea-assignment.git)  
-**Live Deployment URL:** `http://172.31.47.60` (Swarm Manager Public IP)  
+**Live Deployment URL:** `http://16.176.134.242` (Swarm Manager Public IP)  
 **Submission Date:** October 2026  
 
 ---
@@ -79,7 +79,7 @@ The USEA Student Portal application is packaged into lightweight, secure Docker 
   [ 3 Replicas | rolling update: start-first ]
                 |
                 v
-  [ Public Web Users: http://172.31.47.60 ]
+  [ Public Web Users: http://16.176.134.242 ]
 ```
 
 ### 3.2 Toolchain Component Integration
@@ -173,9 +173,9 @@ Three sequential releases were deployed successfully:
 3. **`v1.2.0`:** Bug fixes and container health check probe.
 
 ### 5.3 Zero-Downtime Rolling Update Verification
-During the transition from `v1.0.0` to `v1.1.0`, continuous HTTP requests were issued against `http://172.31.47.60/`:
+During the transition from `v1.0.0` to `v1.1.0`, continuous HTTP requests were issued against `http://16.176.134.242/`:
 ```bash
-while true; do curl -s -o /dev/null -w "%{http_code}\n" http://172.31.47.60/; sleep 0.5; done
+while true; do curl -s -o /dev/null -w "%{http_code}\n" http://16.176.134.242/; sleep 0.5; done
 ```
 **Result:** 100% of requests returned HTTP 200. No dropped connections or timeouts were observed, proving that `order: start-first` successfully maintains availability.
 

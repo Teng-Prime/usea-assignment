@@ -18,7 +18,7 @@ A robust, enterprise-grade cloud deployment demonstrating **Infrastructure as Co
 | **Group Number** | **Group 1** |
 | **Team Members** | • **SARAN Chamroeun**<br>• **SOM Liheng**<br>• **NGY LYTENG** |
 | **Repository URL** | [https://github.com/Teng-Prime/usea-assignment.git](https://github.com/Teng-Prime/usea-assignment.git) |
-| **Live Deployment URL** | `http://172.31.47.60` (Swarm Manager Public IP) |
+| **Live Deployment URL** | `http://16.176.134.242` (Swarm Manager Public IP) |
 | **AWS Region** | `ap-southeast-2` (Sydney) |
 | **ECR Image Registry** | `781493733610.dkr.ecr.ap-southeast-2.amazonaws.com/usea-first-appb` |
 | **Current Release Tag** | `v1.0.0` (with operational workflows for `v1.1.0` and `v1.2.0`) |
@@ -54,7 +54,7 @@ The architecture automates the full lifecycle from code commit to multi-node pro
                        AWS EC2 INFRASTRUCTURE & DOCKER SWARM
 ===================================================================================
                                                      [ Docker Swarm Manager ]
-                                                     (Public IP: 172.31.47.60)
+                                                     (Public IP: 16.176.134.242 | Private IP: 172.31.47.60)
                                                                 │
                      ┌──────────────────────────────────────────┴──────────────────────────────────────────┐
                      ▼                                                                                     ▼
@@ -228,7 +228,7 @@ The pipeline is triggered automatically on **Git Tag Push** or scheduled SCM pol
 ### Verifying Rolling Updates
 During deployment, Docker Swarm updates containers one replica at a time (`parallelism: 1`, `delay: 10s`, `order: start-first`). Graders can verify uninterrupted traffic by looping `curl`:
 ```bash
-while true; do curl -s -o /dev/null -w "%{http_code}\n" http://172.31.47.60/; sleep 0.5; done
+while true; do curl -s -o /dev/null -w "%{http_code}\n" http://16.176.134.242/; sleep 0.5; done
 # Output remains consistently 200 with zero dropped packets
 ```
 
