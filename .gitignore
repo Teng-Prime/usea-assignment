@@ -1,0 +1,19 @@
+---
+
+### 7. `.gitignore` (Root Directory)
+```gitignore
+# Infrastructure & Terraform state files
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+
+# Secret keys and credentials
+*.pem
+*.key
+.env
+
+# OS and Editor files
+.DS_Store
+.idea/
+.vscode/
